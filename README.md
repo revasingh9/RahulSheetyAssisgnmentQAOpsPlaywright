@@ -6,3 +6,5 @@ No Runner: It does not include a test runner, so you would have to manually inte
 Smart Assertions: Provides the expect function with web-first assertions that automatically wait for conditions to be met.
 Orchestration: Manages configuration files, reporters (like HTML reports), and the Trace Viewer for debugging
 Fixtures: Includes powerful Test Fixtures like page and context that are automatically set up and torn down.
+
+
