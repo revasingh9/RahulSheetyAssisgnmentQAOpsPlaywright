@@ -2,8 +2,10 @@ const { expect } = require('@playwright/test');
 
 async function login(page, email, password) {
   await page.goto('https://eventhub.rahulshettyacademy.com/login');
+  expect(page.getByPlaceholder('you@email.com')).toBeVisible()
   await page.getByPlaceholder('you@email.com').fill(email);
   await page.getByLabel('Password').fill(password);
+  expect(page.getByRole('button', { name: 'Sign In' })).toBeVisible()
   await page.getByRole('button', { name: 'Sign In' }).click();
   await page.waitForTimeout(3000);
   
