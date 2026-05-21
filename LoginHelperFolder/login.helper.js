@@ -14,8 +14,10 @@ async function login(page, email, password) {
 }
 
 async function getEventTitles(page) {
-  const cards = page.locator('[data-testid="event-card"]');
+  const cards = page.locator('[data-testid="event-card"]')
   const count = await cards.count();
+   console.log('Card Count:', count);
+   
   const titles = [];
   for (let i = 0; i < count; i++) {
     //console.log(await cards.nth(i).innerHTML());
@@ -26,4 +28,14 @@ async function getEventTitles(page) {
   return titles;
 }
 
-module.exports = { login, getEventTitles };
+async function parseSeatCount(page,card){
+  const  parseSeatCount = await card.getByText(/\d+\sseats available/i).innerText()
+console.log(parseSeatCount)
+ 
+const totalSeats = (String(parseSeatCount).split(' ')[0])
+//console.log(parseSeat.toString().split(' '))
+return totalSeats
+
+}
+
+module.exports = { login, getEventTitles,parseSeatCount };
