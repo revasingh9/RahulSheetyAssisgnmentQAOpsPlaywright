@@ -1,5 +1,6 @@
 const { expect } = require('@playwright/test');
 
+
 async function login(page, email, password) {
   await page.goto('https://eventhub.rahulshettyacademy.com/login');
   expect(page.getByPlaceholder('you@email.com')).toBeVisible()

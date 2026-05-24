@@ -1,0 +1,14 @@
+{
+  "booking1": {
+    "bookingRefValue": "W-3BCFZS",
+    "eventTitle": "World Tech Summit",
+    "ticketCount": "1",
+    "totalPrice": "W-3BCFZS"
+  },
+  "booking2": {
+    "bookingRefValue": "D-CYE2SE",
+    "eventTitle": "Dilli Diwali Mela",
+    "ticketCount": "2",
+    "totalPrice": "$600"
+  }
+}

@@ -25,12 +25,20 @@ module.exports = defineConfig({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  timeout: 60000,
+  expect: {
+    // ✅ Timeout for each expect/assertion — default is 5000ms (5s)
+    timeout: 10000, // 10 seconds
+  },
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
      baseURL: 'https://eventhub.rahulshettyacademy.com',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+    actionTimeout: 15000,  // 15 seconds
+
+    navigationTimeout: 30000,
 
     viewport:null,
     launchaoptions:{ args:['--start-maximized']
