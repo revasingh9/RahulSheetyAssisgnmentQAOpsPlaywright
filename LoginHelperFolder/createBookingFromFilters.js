@@ -1,12 +1,16 @@
 const { expect } = require("@playwright/test");
-const fs = require('fs')
-const path = require('path')
-const  Booking_Refs_InputFile_Data =path.resolve(process.cwd(), 'Data', 'bookingRefsData.json');
+const fs = require("fs");
+const path = require("path");
+const Booking_Refs_InputFile_Data = path.resolve(
+  process.cwd(),
+  "Data",
+  "bookingRefsData.json",
+);
 
 async function createBookingFromFilters(page, { searchText, category, city }) {
   await page.getByPlaceholder("Search events, venues…").fill(searchText);
   const categoryDropDownOptionMenu = page.getByRole("combobox").first();
- await expect(categoryDropDownOptionMenu).toBeVisible();
+  await expect(categoryDropDownOptionMenu).toBeVisible();
   const valueOfCategoryDropDownOption = await categoryDropDownOptionMenu
     .locator("option")
     .allInnerTexts();
@@ -77,64 +81,130 @@ async function bookNow(page) {
   await bookNowButton.click();
 }
 
+async function locateEventBookingCard(page, bookingRef) {
+  // Function — just finds and returns the single card locator
+  const bookingcard = page.locator("#booking-card");
+  await bookingcard.first().waitFor({ state: "visible" });
 
-async function findBookingCardByRef(page, bookingRef) {
-    const bookingcard =  page.locator('#booking-card')
-     await bookingcard.first().waitFor({ state: 'visible' });
-  const getBookingRefLocator = await bookingcard.locator(".booking-ref");
-  await page.waitForTimeout(5000)
-  const getConfirmedText = await bookingcard.locator(".ring-emerald-200");
-  const geteventTitle = await bookingcard.getByRole('heading')
-  const getTicketCount = await bookingcard.getByText(/\d+\s+ticket[s]?/i);
-   const getTicketPrice = await bookingcard.locator('.text-xl.font-bold.text-indigo-700')
-
-  
   const getBookingCardCount = await bookingcard.count();
-  console.log('Total booking refs found on page:', getBookingCardCount);
+
   for (let i = 0; i < getBookingCardCount; i++) {
-    const getsingleBookingRefText = getBookingRefLocator.nth(i);
-    const refText = await getsingleBookingRefText.textContent();
-    console.log(`Checking ref ${i}:"${refText?.trim()}"`);
+    const singleCard = bookingcard.nth(i);
+    const refText = await singleCard.locator(".booking-ref").textContent();
 
-    if (refText && refText.trim() === bookingRef.trim()) {
-      console.log(`Found card for ref: ${bookingRef}`);
-      const confirmedText = getConfirmedText.nth(i);
-    const labelConfirmText = await confirmedText.textContent();
-    const geteventMyBookingTitle = geteventTitle.nth(i)
-    const labelgeteventMyBookingTitle = await geteventMyBookingTitle.textContent();
-    const geteventMyBookingTicketCount = await getTicketCount.nth(i)
-    const labelMyBookingTicketCount = await geteventMyBookingTicketCount.textContent()
-    const ticketCount =  labelMyBookingTicketCount.match(/\d+/)[0];
-    const geteventMyBookingTicketPrice= await getTicketPrice.nth(i)
-    const labelMyBookingTicketPrice = await geteventMyBookingTicketPrice.textContent()
+    if (!refText) continue;
 
-      console.log("confirm text",labelConfirmText)
-      console.log('Label Get Event MyBookingTitle:',labelgeteventMyBookingTitle)
-       console.log('Label MyBooking Ticket Count:',ticketCount)
-        console.log('Label MyBooking Ticket Price:' ,labelMyBookingTicketPrice)
-      expect(labelConfirmText).toContain('confirmed')
-      fs.writeFileSync(Booking_Refs_InputFile_Data, JSON.stringify(
-              {
-                  bookingRefValue:bookingRef,
-                  labelConfirmText: labelConfirmText,
-                  eventTitle:labelgeteventMyBookingTitle,
-                  ticketCount: ticketCount,
-                 totalPrice: labelMyBookingTicketPrice ,
-                         
-
-              },
-              null,
-              2
-          )
-          );
-      return getsingleBookingRefText;
+    if (refText.trim() === bookingRef.trim()) {
+      console.log(`Found card at index ${i} for ref: ${bookingRef}`);
+      return singleCard; //return the whole card locator
     }
+  }
+
+  throw new Error(`Booking ref "${bookingRef}" not found on page`);
+}
+
+async function viewCardDetail(page,card, bookingRef){
+    const viewDetailsBookingCards = await card.getByRole('button', {name:'View Details'}).click()
+     const breadCrumb =await page.locator('.text-gray-900.font-mono').textContent()
+     const viewDetailsEventTitle = await page.getByRole('heading',{ level: 1 })
+  const viewDetailsEventTitleText = await viewDetailsEventTitle.textContent()
+
+
+  const customerDetailsCard = page.locator('.bg-white.rounded-2xl.border.border-gray-100.shadow-sm.p-6').filter({ hasText: 'Customer Details' })
+  const viewDetailsCustomerInformation = await customerDetailsCard.locator('.flex.justify-between.items-start.gap-4')
+  const viewDetailsCustomerNameText = await viewDetailsCustomerInformation.filter({ hasText: /name/i })
+  .locator('span').nth(1)
+  .innerText()
+
+  const viewDetailsCustomerEmail = await viewDetailsCustomerInformation
+   .filter({ hasText: /email/i })
+  .locator('span').nth(1)
+  .innerText();
+
+ const viewDetailsCustomerPhone = await viewDetailsCustomerInformation
+.filter({ hasText: /phone/i })
+  .locator('span').nth(1)
+  .innerText();
+  console.log('Name:', viewDetailsCustomerNameText);
+console.log('Phone:', viewDetailsCustomerPhone);
+console.log('Email:',viewDetailsCustomerEmail);
+  const paymentSummaryDetailsCard = page.locator('.bg-white.rounded-2xl.border.border-gray-100.shadow-sm.p-6')
+  .filter({ hasText: 'Payment Summary' })
+   //const viewDetailsPaymentSummary = await paymentSummaryDetailsCard
+   const viewDetailsPaymentSummaryTicketCount = await paymentSummaryDetailsCard.filter({ hasText: /ticket/i })
+  .locator('span').nth(1)
+  .innerText()
+  const viewDetailsPaymentSummaryTotalTicketPrice = await paymentSummaryDetailsCard
+  .filter({ hasText: /Total Paid/i })
+  .locator('span').last()
+ .innerText()
+  
+ const bookingInformationCard = page.locator('.bg-white.rounded-2xl.border.border-gray-100.shadow-sm.p-6')
+  .filter({ hasText: 'Booking Information' })
+  const viewDetailsBookingID= await bookingInformationCard.filter({ hasText: /Booking ID/i })
+  .locator('span').last()
+  .innerText()
+  const numericValueBookingID = parseInt(viewDetailsBookingID.trim())
+  console.log('Ticket Count:', viewDetailsPaymentSummaryTicketCount);
+console.log('Total Price:', viewDetailsPaymentSummaryTotalTicketPrice);
+console.log('Booking ID:', viewDetailsBookingID);
+
+return {
+    breadCrumb: breadCrumb,
+    viewDetailsEventTitleText:viewDetailsEventTitleText,
+    viewDetailsCustomerNameText: viewDetailsCustomerNameText,
+    viewDetailsCustomerEmail: viewDetailsCustomerEmail,
+    viewDetailsCustomerPhone: viewDetailsCustomerPhone,
+    viewDetailsPaymentSummaryTicketCount: viewDetailsPaymentSummaryTicketCount,
+    viewDetailsPaymentSummaryTotalTicketPrice:viewDetailsPaymentSummaryTotalTicketPrice,
+    numericValueBookingID:numericValueBookingID
+  };
+
 
 }
+async function extractBookingCardDetails(card, bookingRef) {
+  const labelConfirmText = await card
+    .locator(".ring-emerald-200")
+    .textContent();
+
+  const labelgeteventMyBookingTitle = await card
+    .getByRole("heading")
+    .textContent();
+
+  const labelMyBookingTicketCount = await card
+    .getByText(/\d+\s+ticket[s]?/i)
+    .textContent();
+  const ticketCount = labelMyBookingTicketCount.match(/\d+/)[0];
+
+  const labelMyBookingTicketPrice = await card
+    .locator(".text-xl.font-bold.text-indigo-700")
+    .textContent();
+
+
+
+  // Return all values as an object
+  return {
+    bookingRefValue: bookingRef,
+    labelConfirmText: labelConfirmText,
+    eventTitle: labelgeteventMyBookingTitle,
+    ticketCount: ticketCount,
+    totalPrice: labelMyBookingTicketPrice,
+  };
+}
+function writeBookingDataToFile(bookingDetails) {
+  fs.writeFileSync(
+    Booking_Refs_InputFile_Data,
+    JSON.stringify(bookingDetails, null, 2),
+  );
+  console.log("Written booking data to file:", Booking_Refs_InputFile_Data);
+  console.log("Data written:", bookingDetails);
 }
 module.exports = {
   createBookingFromFilters,
   bookingAssertion,
   bookNow,
-  findBookingCardByRef,
+  locateEventBookingCard,
+  extractBookingCardDetails,
+  writeBookingDataToFile,
+  viewCardDetail
 };

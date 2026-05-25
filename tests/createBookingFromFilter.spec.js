@@ -4,7 +4,10 @@ const {
   createBookingFromFilters,
   bookingAssertion,
   bookNow,
-  findBookingCardByRef,
+  locateEventBookingCard,
+  extractBookingCardDetails,
+  writeBookingDataToFile,
+  viewCardDetail,
 } = require("../LoginHelperFolder/createBookingFromFilters");
 const { faker } = require("@faker-js/faker");
 const fs = require("fs");
@@ -73,7 +76,7 @@ test("Create Booking From Filters", async ({ page }) => {
   // Capture booking 1 Ticket Price from success page
   const eventTicketsPriceOnBookingPage = await page
     .locator(".flex.items-center.justify-between.text-sm")
-    .filter({ hastext: "Total" })
+    .filter({ hasText: "Total" })
     .locator("span")
     .nth(1)
     .innerText();
@@ -139,12 +142,18 @@ test("Create Booking From Filters", async ({ page }) => {
           eventTitle: eventTitileOnBookingPage,
           ticketCount: eventTicketsCountOnBookingPage,
           totalPrice: eventTicketsPriceOnBookingPage,
+           customerName: customerName,
+          customerEmail: customerEmail,
+          phone: customerPhone,
         },
         booking2: {
           bookingRefValue: bookingRefValue2,
           eventTitle: eventTitleOnBookingPage2,
           ticketCount: ticketCount2,
           totalPrice: totalPrice2,
+          customerName: customerName,
+          customerEmail: customerEmail,
+          phone: customerPhone,
         },
       },
       null,
@@ -171,13 +180,12 @@ test("Guard against accidental index-based logic", async ({ page }) => {
   await page.goto("/login");
   await login(page, "revasingh9@yahoo.in", "Mall##ika30");
   await page.getByRole("link", { name: "My Bookings" }).first().click();
-  //  await page.waitForSelector('.booking-ref', { state: 'visible' });
-  // const getBookingRefText = await page.locator('.booking-ref').allTextContents();
-  // console.log('Booking Refs:', getBookingRefText);
-  // expect(getBookingRefText).toContain(bookingRefValue )
-  // expect(getBookingRefText).toContain(bookingRefValue2)
+  const Singlecard = await locateEventBookingCard(page, bookingRefValue);
+  const cardInformation = await extractBookingCardDetails(Singlecard, bookingRefValue);
+  await writeBookingDataToFile(cardInformation)
 
-  const bookingRefOne = await findBookingCardByRef(page, bookingRefValue);
+
+
   const saved1 = JSON.parse(
     fs.readFileSync(Booking_Refs_InputFile_Data, "utf-8"),
   );
@@ -189,25 +197,24 @@ test("Guard against accidental index-based logic", async ({ page }) => {
     eventTitle: labelgeteventMyBookingTitle,
     ticketCount: ticketCount,
     totalPrice: labelMyBookingTicketPrice,
+    customerName: customerName,
+    customerEmail: customerEmail,
+    phone: customerPhone,
   } = saved1;
   expect(saved.booking1.bookingRefValue).toBe(saved1.bookingRefValue);
   expect(labelConfirmText).toContain("confirmed");
   expect(saved.booking1.eventTitle).toBe(saved1.eventTitle);
   expect(saved.booking1.ticketCount).toBe(saved1.ticketCount);
-  //  expect(saved.booking1.totalPrice).tobe(totalPrice)
+  expect(saved.booking1.totalPrice).toBe(saved1.totalPrice)
 
-  await expect(bookingRefOne).toHaveText(bookingRefValue);
-  const bookingRefTwo = await findBookingCardByRef(page, bookingRefValue2);
+ // const bookingRefTwo = await WriteFileWithBookingInfor(page, bookingRefValue2);
+    const Singlecard1 = await locateEventBookingCard(page, bookingRefValue2);
+  const cardInformation1 = await extractBookingCardDetails(Singlecard1, bookingRefValue2);
+  await writeBookingDataToFile(cardInformation1)
+  
   const saved2 = JSON.parse(
     fs.readFileSync(Booking_Refs_InputFile_Data, "utf-8"),
   );
-  const {
-    bookingRefValue: bookingRef1,
-    labelConfirmText: labelConfirmText1,
-    eventTitle: labelgeteventMyBookingTitle1,
-    ticketCount: ticketCount1,
-    totalPrice: labelMyBookingTicketPrice1,
-  } = saved2;
   expect(saved.booking2.bookingRefValue).toBe(saved2.bookingRefValue);
   expect(labelConfirmText).toContain("confirmed");
   expect(saved.booking2.eventTitle).toBe(saved2.eventTitle);
@@ -218,3 +225,57 @@ test("Guard against accidental index-based logic", async ({ page }) => {
   //   const getConfirmedText = await bookingRefValue.locator(`span:has-text("confirmed")`).innerText()
   //   console.log("Get Confirmed Text:",getConfirmedText)
 });
+
+test('Open the first booking detail page and cross-check all sections',async({page}) => {
+if (!fs.existsSync(Booking_Refs_File)) {
+    throw new Error(
+      'bookingRefs.json not found — run "Create Booking From Filters" test first',
+    );
+  }
+  const saved = JSON.parse(fs.readFileSync(Booking_Refs_File, "utf-8"));
+  const bookingRefValue = saved.booking1.bookingRefValue;
+  const bookingRefValue2 = saved.booking2.bookingRefValue;
+await page.goto("/login");
+  await login(page, "revasingh9@yahoo.in", "Mall##ika30");
+  await page.getByRole("link", { name: "My Bookings" }).first().click();
+
+  const Singlecard = await locateEventBookingCard(page, bookingRefValue);
+const viewCardDetail1 =await viewCardDetail(page,Singlecard,bookingRefValue)
+expect(viewCardDetail1.breadCrumb).toEqual(bookingRefValue)
+expect(viewCardDetail1.viewDetailsEventTitleText).toContain(saved.booking1.eventTitle)
+expect(viewCardDetail1.viewDetailsCustomerNameText).toContain(saved.booking1.customerName)
+expect(viewCardDetail1.viewDetailsCustomerEmail).toMatch(saved.booking1.customerEmail.toLowerCase())
+expect(viewCardDetail1.viewDetailsCustomerPhone).toContain(saved.booking1.phone)
+expect(viewCardDetail1.viewDetailsPaymentSummaryTicketCount).toEqual(saved.booking1.ticketCount)
+expect(viewCardDetail1.viewDetailsPaymentSummaryTotalTicketPrice).toEqual(saved.booking1.totalPrice)
+expect(typeof viewCardDetail1.numericValueBookingID).toBe('number')
+
+})
+
+test('Return and validate the second booking detail page',async({page})=> {
+  if (!fs.existsSync(Booking_Refs_File)) {
+    throw new Error(
+      'bookingRefs.json not found — run "Create Booking From Filters" test first',
+    );
+  }
+  const saved = JSON.parse(fs.readFileSync(Booking_Refs_File, "utf-8"));
+  const bookingRefValue = saved.booking1.bookingRefValue;
+  const bookingRefValue2 = saved.booking2.bookingRefValue;
+await page.goto("/login");
+  await login(page, "revasingh9@yahoo.in", "Mall##ika30");
+  await page.getByRole("link", { name: "My Bookings" }).first().click();
+
+  const Singlecard = await locateEventBookingCard(page, bookingRefValue2);
+const viewCardDetail1 =await viewCardDetail(page,Singlecard,bookingRefValue2)
+expect(viewCardDetail1.breadCrumb).toEqual(bookingRefValue2)
+expect(viewCardDetail1.viewDetailsEventTitleText).toContain(saved.booking2.eventTitle)
+expect(viewCardDetail1.viewDetailsCustomerNameText).toContain(saved.booking2.customerName)
+expect(viewCardDetail1.viewDetailsCustomerEmail).toMatch(saved.booking2.customerEmail.toLowerCase())
+expect(viewCardDetail1.viewDetailsCustomerPhone).toContain(saved.booking2.phone)
+expect(viewCardDetail1.viewDetailsPaymentSummaryTicketCount).toEqual(saved.booking2.ticketCount)
+expect(viewCardDetail1.viewDetailsPaymentSummaryTotalTicketPrice).toEqual(saved.booking2.totalPrice)
+expect(typeof viewCardDetail1.numericValueBookingID).toBe('number')
+expect(viewCardDetail1.breadCrumb).not.toContain(bookingRefValue)
+expect(viewCardDetail1.viewDetailsEventTitleText).not.toContain(saved.booking1.eventTitle)
+ 
+})
