@@ -24,7 +24,7 @@ async function createBookingFromFilters(page, { searchText, category, city }) {
   const cards = page.locator('[data-testid="event-card"]');
   await expect(cards.first()).toBeVisible();
 
-  return cards;
+  return cards.first();
 }
 
 async function bookingAssertion(
