@@ -6,13 +6,13 @@ const config = require('../playwright.config')
 test('Validate Playwright Config',async () => {
 
     console.log(config)
-    expect(config.use.baseURL).toBeDefined();
+    await expect(config.use.baseURL).toBeDefined();
 })
 
 
 test('Validate Browser Projects', () => {
 const projectNames = config.projects?.map(project => project.name)
-expect(projectNames).toContain('chromium')
-expect(projectNames).toContain('firefox')
+ expect(projectNames).toContain('chromium')
+ expect(projectNames).toContain('firefox')
 
 })

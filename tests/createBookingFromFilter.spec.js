@@ -8,7 +8,7 @@ const {
   extractBookingCardDetails,
   writeBookingDataToFile,
   viewCardDetail,
-} = require("../LoginHelperFolder/createBookingFromFilters");
+} = require("../LoginHelperFolder/createBookingFromFilters.helper")
 const { faker } = require("@faker-js/faker");
 const fs = require("fs");
 const path = require("path");
@@ -25,9 +25,10 @@ const Booking_Refs_InputFile_Data = path.resolve(
 test.describe.configure({ mode: "serial" });
 
 test("Create Booking From Filters", async ({ page }) => {
-  await page.goto("/login");
-  await login(page, "revasingh9@yahoo.in", "Mall##ika30");
+
+  await login(page);
   await page.getByRole("link", { name: "Browse Events →" }).click();
+  
 
   const cards = await createBookingFromFilters(page, {
     searchText: "World",

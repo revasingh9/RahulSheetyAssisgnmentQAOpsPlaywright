@@ -1,6 +1,18 @@
 // @ts-check
-import { defineConfig, devices } from '@playwright/test';
+const { defineConfig, devices }= require('@playwright/test') ;
 
+  const path = require('path');
+  
+
+console.log("CONFIG DIR:", __dirname);
+console.log("ENV PATH:", path.resolve(__dirname, '.env'));
+require('dotenv').config({
+  path: path.join(process.cwd(), '.env'),
+  override: true,
+  debug: true
+
+});
+  console.log('ENV EMAIL:', process.env.LOGIN_EMAIL);
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -30,6 +42,7 @@ module.exports = defineConfig({
     // ✅ Timeout for each expect/assertion — default is 5000ms (5s)
     timeout: 10000, // 10 seconds
   },
+
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
      baseURL: 'https://eventhub.rahulshettyacademy.com',
@@ -41,7 +54,7 @@ module.exports = defineConfig({
     navigationTimeout: 30000,
 
     viewport:null,
-    launchaoptions:{ args:['--start-maximized']
+    launchOptions:{ args:['--start-maximized']
       
     }
   },

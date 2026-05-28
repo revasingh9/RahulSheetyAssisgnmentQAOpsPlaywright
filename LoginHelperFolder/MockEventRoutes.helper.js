@@ -45,7 +45,7 @@ const mockEvents= [{
 async function installMockEventRoutes(page, mockEvents) {
   await page.route('**/api/events?page=1&limit=12', async route => {
     //intercepting response - API response -> ||||(intercepting the data as fake data and that fake data sending to browser ) browser->render data on frontend
-     const response = await  page.request.fetch(route.request())
+ //    const response = await  page.request.fetch(route.request())
       const  body = JSON.stringify({
         data: mockEvents,       
       pagination: {
@@ -56,22 +56,20 @@ async function installMockEventRoutes(page, mockEvents) {
        }
     });
       
-    await route.fulfill({    // will send data to browser
-        response,    
-        body, 
-        contentType:'application/json'             
-     
-      })
+await route.fulfill({
+      status: 200,           // ✅ add status
+      body,
+      contentType: 'application/json'
+    });
    });
 
-   for(const event of mockEvents){
-     await page.route(`**/api/events/${event.id}`, async route => {
-      const body = JSON.stringify(event);
+    for (const event of mockEvents) {
+    await page.route(`**/api/events/${event.id}`, async route => {
       await route.fulfill({
         status: 200,
-        body,
+        body: JSON.stringify(event),
         contentType: 'application/json',
-   });
+      });
      });
     }
 }
