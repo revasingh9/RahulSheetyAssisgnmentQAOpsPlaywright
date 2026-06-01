@@ -57,7 +57,7 @@ async function installMockEventRoutes(page, mockEvents) {
     });
       
 await route.fulfill({
-      status: 200,           // ✅ add status
+      status: 200,           
       body,
       contentType: 'application/json'
     });
