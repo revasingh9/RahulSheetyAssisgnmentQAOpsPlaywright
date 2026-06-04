@@ -1,71 +1,60 @@
 const { expect, request } = require("@playwright/test");
-const mutateBooking = 
-{
-    "success": true,
-    "data": {
-        "id": 48255,
-        "eventId": 1,
-        "userId": 3965,
-        "customerName": "Amanda Labbe",
-        "customerEmail": "testrahul@gmail.com",
-        "customerPhone": "14052281080",
-        "quantity": 4,
-        "totalPrice": "6000",
-        "status": "confirmed",
-        "bookingRef": "Z-G4XEUK",
-        "createdAt": "2026-06-01T22:25:52.088Z",
-        "updatedAt": "2026-06-01T22:25:52.088Z",
-        "event": {
-            "id": 1,
-            "title": "India Tech Summit",
-            "description": "A premier technology conference bringing together 500+ industry leaders, startup founders, and engineers for two days of keynotes, workshops, and networking. Topics include AI/ML, cloud infrastructure, DevSecOps, and the future of the Indian tech ecosystem.",
-            "category": "Conference",
-            "venue": "Hyderabad, Hitech city",
-            "city": "Hyderabad",
-            "eventDate": "2026-04-18T09:00:00.000Z",
-            "price": "1500",
-            "totalSeats": 500,
-            "availableSeats": 8,
-            "imageUrl": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800",
-            "isStatic": true,
-            "userId": null,
-            "createdAt": "2026-02-22T23:03:37.659Z",
-            "updatedAt": "2026-05-23T06:57:02.677Z"
-        }
-      }}
-
-
+const mutateBooking = {
+  "bookingRef": "OKC-O2z7IB",
+  "title": "Testing live",
+  "totalPrice": "999",
+  "quantity": "10"
+};
 async function patchBookingsList(page, mutateBooking) {
   let patchedBooking = null;
-  await page.route("**/api/bookings?page=1&limit=10", async route => {
-    console.log('BOOKINGS LIST ROUTE INTERCEPTED');
-    //Fetch live response
-    const response = await route.fetch();
-    const responseBody = await response.json();
-    console.log('Original data:', responseBody.data);
+  let routeTriggered = false;
+  
+  const routePromise = new Promise((resolve) => {
+    page.route("**/api/bookings**", async (route) => {
+      const url = route.request().url();
+      // Only intercept the bookings list endpoint
+      if (url.includes("page=1&limit=10")) {
+        console.log("BOOKINGS LIST ROUTE INTERCEPTED");
+        //Fetch live response
+        const response = await route.fetch();
+        const responseBody = await response.json();
+        console.log("Original data:", responseBody.data);
 
-//Find correct booking index
-    const bookingIndex = responseBody.data.findIndex(
-      booking => booking.id === mutateBooking.id
-    );
-    console.log('Found booking at index:', bookingIndex);
-    if (bookingIndex !== -1) {
-        console.log('Before patch:', responseBody.data[bookingIndex]);
-      Object.assign(responseBody.data[bookingIndex], mutateBooking);
-      console.log('After patch:', responseBody.data[bookingIndex]);
-    } else {
-      console.warn(`Booking with id ${mutateBooking.id} not found — no patch applied`);
-    }
-    console.log('mutateBooking:', mutateBooking);
-    // Fulfill with modified list
-    await route.fulfill({
-      status: response.status(),
-      body: JSON.stringify(responseBody),
-      contentType: "application/json",
+        // Patch the first record (index 0) — apply to both booking & its nested event
+        if (responseBody.data && responseBody.data.length > 0) {
+          const firstBooking = responseBody.data[0];
+          console.log('Before patch:', firstBooking);
+          console.log('Booking ID before patch:', firstBooking.id);
+          Object.assign(firstBooking, mutateBooking);       // top-level fields like totalPrice
+          Object.assign(firstBooking.event, mutateBooking); // nested fields like title
+          patchedBooking = firstBooking;
+          console.log('After patch:', firstBooking);
+          console.log('Patched Booking ID:', patchedBooking.id);
+          console.log('mutateBooking:', mutateBooking);
+          routeTriggered = true;
+          resolve(patchedBooking);
+        }
+        
+        // Fulfill with modified list
+        await route.fulfill({
+          status: response.status(),
+          body: JSON.stringify(responseBody),
+          contentType: "application/json",
+        });
+      } else {
+        route.continue();
+      }
     });
   });
-  return mutateBooking;
-  //Return the mutateBooking so test can use it as getPatchedState
+  
+  // Wait a bit for the route to be set up, but don't block indefinitely
+  const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 500));
+  
+  return {
+    mutateBooking,
+    patchedBooking: null, // Will be populated after route triggers
+    routePromise // Return the promise so test can await it if needed
+  };
 }
 
 // async function patchBookingsList(page, mutateBooking) {
@@ -83,11 +72,11 @@ async function patchBookingsList(page, mutateBooking) {
 // console.log(mutateBooking)
 
 //     await route.fulfill({
-     
+
 //       status: response.status(),
 //       body :JSON.stringify(responseBody),
 //       contentType: "application/json",
-     
+
 //     });
 // })
 // }
