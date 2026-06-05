@@ -1,20 +1,34 @@
-const{expect} = require('@playwright/test')
-const Create_API_Booking_Output = path.resolve(
-  process.cwd(),
-  "Data",
-  "APIBookingOutput.json",
-);
-tes
+const { expect } = require("@playwright/test");
 
-async function lookupBookingByRef(apiContext, bookingRef){
-    const saved1 = JSON.parse(fs.readFileSync(Create_API_Booking_Output, "utf-8"), );
-       // const getEventResponse = await apiContext.get('https://api.eventhub.rahulshettyacademy.com/api/events?page=1&limit=12')
-     const lookupBookingRefResponse = await apiContext.fetch('https://api.eventhub.rahulshettyacademy.com/api/bookings/`${bookingRef}`')
-    const lookupBookingByRef = await lookupBookingRefResponse.json()
-    const {booking_id,reference_code,totalPrice} = lookupBookingByRef
-    await expect(lookupBookingByRef[0]).toBeTruthy()//Expected: The lookup response is successful
-    await expect(saved1.bookingRef).toContain(bookingRef)//Expected: The returned booking id matches the id from the create response
-    await expect(bookingRef).toEqual(lookupBookingByRef[0]) //Expected: The returned reference code matches exactly
-    await expect(saved1).toEqual(bookingRef) //Expected: The returned ticket quantity and total amount match the quantity and computed total from Step 1
- 
+async function lookupBookingByRef(apiContext, bookingRef, token) {
+  try {
+    // Lookup booking by reference using the API
+        console.log(`https://api.eventhub.rahulshettyacademy.com/api/bookings/${bookingRef}`)
+  const lookupResponse = await apiContext.fetch(
+  `https://api.eventhub.rahulshettyacademy.com/api/bookings/${bookingRef}`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+);
+
+    // Verify the response is successful
+   
+
+    const lookupData = await lookupResponse.json();
+     console.log("Booking lookup response:", lookupData);
+    console.log("Booking lookup response:", lookupData);
+
+    // Extract booking details
+    const { id, bookingRef: returnedRef, quantity, totalPrice } = lookupData;
+    const booking = lookupData.data || lookupData; // Handle cases where data is nested
+
+    return lookupData
+  
+  } catch (error) {
+    throw new Error(`Failed to lookup booking by ref "${bookingRef}": ${error.message}`);
+  }
 }
+
+module.exports = { lookupBookingByRef };

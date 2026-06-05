@@ -1,21 +1,4 @@
-//const{expect} = require('@playwright/test')
 
-
-
-// async function createAuthorizedApiContext(playwright, email, password){
-//     const loginPayLoad = { email, password }
-//     const apiContext = await playwright.request.newContext();
-//     const loginResponse = await apiContext.post("https://api.eventhub.rahulshettyacademy.com/api/auth/login",{
-//          data: loginPayLoad,
-//     })     
-//     const loginResponse1 = await loginResponse.json()
-//     const token =  loginResponse1.token
-//     console.log('Token:', token)
-
-//    return {apiContext,token}
-
-
-// };
 const { request } = require('@playwright/test');
 
 async function createAuthorizedApiContext(playwright, email, password) {
