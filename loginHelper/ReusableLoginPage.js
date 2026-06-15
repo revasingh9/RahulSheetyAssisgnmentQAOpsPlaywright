@@ -19,7 +19,7 @@ class ReusableLoginPage {
         await expect (this.userName).toBeVisible();
 
         await this.password.fill(password);
-        await (this.password).toBeVisible()
+        await expect(this.password).toBeVisible()
           await expect (this.signInButton).toBeVisible()
         await this.signInButton.click();
         await expect (this.page).toHaveURL(/login/)

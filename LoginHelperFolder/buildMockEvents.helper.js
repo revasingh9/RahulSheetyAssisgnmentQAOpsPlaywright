@@ -1,5 +1,5 @@
-const{expect, request} = require('@playwright/test')
-const mockEvents= [{
+const{ expect } = require('@playwright/test')
+const buildMockEvents= [{
 
     id: 101,
     title: "Tech Conference 2026",
@@ -88,4 +88,4 @@ async function findEventCardByTitle(page,targetTitle,mockEvents){
   };
 
 }
-module.exports = {installMockEventRoutes,findEventCardByTitle,mockEvents};
+module.exports = { installMockEventRoutes, findEventCardByTitle ,buildMockEvents };
