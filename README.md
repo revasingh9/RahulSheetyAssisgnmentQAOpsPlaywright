@@ -137,4 +137,54 @@ Difference between 'private'/'public' and 'private readonly'/'public readonly'
 private/public :- Used when the value of the property will change over time while running test or application.
 'private readonly'/'public readonly' :-Used when the property is set inside the constructor and should never be overwritten or changed for the entire lifecycle of that object.
 
+3-Inheritance-and-Extends
+
+What is Inheritance and when would you use it in a Playwright project?
+
+Inheritance means inhertining the base/parent class properties and extending/or adding the more properties to child class using the extends
+keywords. This allows the child class to reuse existing code while extending it with new.
+
+You use it when you have common components, actions, or properties shared across multiple pages.
+The Base Page (Parent Class): You create a BasePage class that holds common elements (like a navigation bar, header, or footer) and common methods (like MapsTo(), waitForPageLoad()).
+The Specific Pages (Child Classes): Pages like LoginPage, DashboardPage will extend the BasePage. They automatically get access to the common navigation methods without rewriting them, allowing them to focus only on their unique locators.
+
+import { Page, Locator } from '@playwright/test';
+export class BaseEventsPage  {
+  protected readonly page:Page
+  private readonly eventCards:Locator
+
+  constructor(page: Page) {
+    this.page = page;
+     this.eventCards = page.locator('[data-testid="event-card"]');
+  }
+
+  async navigate(): Promise<void>{
+  await this.page.goto('https://eventhub.rahulshettyacademy.com/events')
+  }
+
+ async waitForCards(): Promise<void>{
+  await this.eventCards.first().waitFor({state:'attached"})
+ }
+ async getCardCount(): Promise<number>{
+  return await this.eventCards.count();
+ }
+}
+import(BaseEventsPage) from'./'
+export class AdminEventsPage extends BaseEventsPage{
+  constructor(page: Page){
+    super(page)
+  }
+}
+
+export class UserEventsPage extends BaseEventsPage{
+  constructor(page: Page){
+    super(page)
+  }
+
+}
+
+//I don't understand what I have to do for this question and I don't understand  composition also, I tried google, still it is not that clear.
+
+Bonus: you discuss when inheritance is the right choice vs composition — inheritance suits "is-a" relationships (AdminEventsPage IS an EventsPage), while composition suits "has-a" relationships
+
   
