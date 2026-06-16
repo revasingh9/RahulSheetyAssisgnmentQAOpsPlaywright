@@ -169,7 +169,7 @@ export class BaseEventsPage  {
   return await this.eventCards.count();
  }
 }
-import(BaseEventsPage) from'./'
+import(BaseEventsPage) from'./BaseEventsPage'
 export class AdminEventsPage extends BaseEventsPage{
   constructor(page: Page){
     super(page)
@@ -187,4 +187,38 @@ export class UserEventsPage extends BaseEventsPage{
 
 Bonus: you discuss when inheritance is the right choice vs composition — inheritance suits "is-a" relationships (AdminEventsPage IS an EventsPage), while composition suits "has-a" relationships
 
+
+//Assignment-Protected-vs-Private
+
+What is the difference between protected and private in TypeScript?
+Both private and protected allow properties to be changed inside the same class.
+Difference :-
+private:- the property can only be accessed inside the exact class where it was created. Even child classes that inherit from it cannot see or change it.
+protected:- the property can be accessed inside the class where it was created AND any child classes(subclasses) that extend it.
   
+  class basePage{
+    protected page: Page;   //Child classes CAN use this
+    userName : string;  
+    private secretKey = string; // ONLY BasePage can use this
+
+     constructor(page: Page){
+      this.page = page;
+      this.userName = 'testuser@gmail.com';
+     }
+  }
+
+  class loginpage extends basePage{
+    async login(){
+      // 1. This works perfectly because 'page' is protected!
+      await this.page.fill('#username', 'user')
+      console.log(this.secretKey); //'secretKey' is private and only accessible within class 'BasePage'
+    }
+  }
+Question:  In the BaseEventsPage class from Q3, the page property is marked protected. If you changed it to private, what would break and why?
+
+Answer : If I change the page property from protected to private , page property will not be accessed in child class and it will give error.
+AdminEventsPage and UserEventsPage only call super(page) inside their constructors,so the code will work without any error . However, it will break the moment we try to add child-specific methods that interact with the browser window.
+
+
+"In a scalable Page Object Model architecture, the browser page instance and any globally shared elements  inside a Base Page Object should almost always be marked as protected, not private. Because Child Page Objects are created specifically to build upon the base layer. If we lock these core properties down as private, we defeat the purpose of inheritance. Every time a child page needs to perform an action unique to its page (such as taking a screenshot, waiting for a custom network event, or interacting with a shared header element), it will be blocked by TypeScript.
+By using protected, we maintain clean encapsulation—keeping the outside test files from messing with our internal elements—while ensuring our child pages have the necessary access to extend and scale the automation framework seamlessly."
