@@ -4,15 +4,15 @@ const { defineConfig, devices }= require('@playwright/test') ;
   const path = require('path');
   
 
-console.log("CONFIG DIR:", __dirname);
-console.log("ENV PATH:", path.resolve(__dirname, '.env'));
+//console.log("CONFIG DIR:", __dirname);
+//console.log("ENV PATH:", path.resolve(__dirname, '.env'));
 require('dotenv').config({
   path: path.join(process.cwd(), '.env'),
   override: true,
   debug: true
 
 });
-  console.log('ENV EMAIL:', process.env.LOGIN_EMAIL);
+  //console.log('ENV EMAIL:', process.env.LOGIN_EMAIL);
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv

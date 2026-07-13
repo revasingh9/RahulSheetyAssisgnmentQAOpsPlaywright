@@ -3,8 +3,8 @@ const { login } = require("../LoginHelperFolder/login.helper");
 const {getEventCards} = require('../LoginHelperFolder/getEventCards.helper');
 const { parseSeatCount } = require("../LoginHelperFolder/parseSeatCount.helper");
 
-//const { setDefaultAutoSelectFamilyAttemptTimeout } = require("net");
 
+//Test 1 — Use different locator strategies and filter the Events page
 test("Login and open the Events page", async ({ page }) => {
   await login(page);
   await page.viewportSize({ width: 1920, height: 1080 });
@@ -22,6 +22,8 @@ test("Login and open the Events page", async ({ page }) => {
   //   console.log(text);
   // }
   // await expect(count).toBeGreaterThan(0);
+
+  //Step 2 — Practice multiple locator strategies on the filter area
   await page.getByPlaceholder("Search events, venues…").fill("World");
   const categoryDropDownOptionMenu = page.getByRole("combobox").first();
    const valueOfCategoryDropDownOption =
@@ -55,18 +57,21 @@ test("Work with multiple matching event cards", async ({page}) => {
    await expect(summitCard).toHaveCount(1);
    //Assert the matching card is visible
    await expect(summitCard).toBeVisible()
-  const worldTechSummit= await summitCard.locator('h3').innerText()
-  console.log(worldTechSummit)
-  await expect(worldTechSummit).toEqual('World Tech Summit')
-  const textContainingDollar = await summitCard.getByText(/(\$|USD\s?)\s?\d+(\.\d{1,2})?/).innerText()
-  console.log('Ticket Price:',textContainingDollar)
-  await expect(textContainingDollar).toContain('$')
+   //Step 4 — Extract text and reuse it in assertions
+  const eventTitle= await summitCard.locator('h3').innerText()
+  console.log(eventTitle)
+  await expect(eventTitle).toEqual('World Tech Summit')
+  const eventPriceText = await summitCard.getByText(/(\$|USD\s?)\s?\d+(\.\d{1,2})?/).innerText()
+  console.log('Ticket Price:', eventPriceText);
+  await expect(eventPriceText).toContain('$');
 
-  const seatText = await summitCard.getByText(/\d+\s+seats available/i).innerText()
-  console.log('Seat Count with text:', seatText)
- const seatCount = await parseSeatCount(seatText)
-await expect(seatCount).toBeGreaterThan(0)
-await expect(typeof seatCount).toBe('number')
+  const eventSeatsText = await summitCard.getByText(/\d+\s+seats left!/i).innerText()
+  console.log('Seat Count with text:', eventSeatsText)
+ const eventSeatsCount = await parseSeatCount(eventSeatsText)
+await expect(eventSeatsCount).toBeGreaterThan(0)
+await expect(typeof eventSeatsCount).toBe('number')
+
+//Step 5 — Open the correct event using a scoped locator
 const worldtechsummitBookNowButton =  summitCard.getByRole('link',{name:'Book Now'})
 await worldtechsummitBookNowButton.click()
 await page.waitForLoadState("networkidle")
@@ -74,10 +79,11 @@ console.log(page.url())
 await expect(page.url()).toContain('/events/')
 const h1Text = await page.locator('h1',{hasText:"World Tech Summit"}).innerText()
 console.log(h1Text)
-expect(h1Text).toEqual(worldTechSummit)
+expect(h1Text).toEqual(eventTitle)
 const pricePerTicket = await page.getByRole('paragraph').filter({ hasText: '$' }).innerText()
 console.log(pricePerTicket)
-expect(pricePerTicket).toEqual(textContainingDollar)
+expect(pricePerTicket).toEqual(eventPriceText)
+//Test 2 — Practice nth, first, and last on the event list
 await page.getByRole('link',{name:'Events'}).nth(2).click()
 const searchTextBox = await page.getByPlaceholder("Search events, venues…")
 await expect(searchTextBox).toHaveValue('')
