@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../LoginHelperFolder/Login.Helper';
-import { EventsPage } from '../Pages/EventsPage.ts';
+import { EventsPage } from '../Pages/EventsPage';
 
 test('Search reduces visible event count', async ({ page }) => {
   await login(page, 'your@email.com', 'yourpassword');

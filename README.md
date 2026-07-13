@@ -7,6 +7,8 @@ Smart Assertions: Provides the expect function with web-first assertions that au
 Orchestration: Manages configuration files, reporters (like HTML reports), and the Trace Viewer for debugging
 Fixtures: Includes powerful Test Fixtures like page and context that are automatically set up and torn down.
 
+
+
 What is a Class and how does it relate to Page Objects in Playwright?
 A class is a blue print or reusable template containing properties and methods used to create objects that group related data(properties) and actions(methods)together. In Playwright POM, classes represent application pages and encapsulate locators and page actions to create scalable and maintainable automation frameworks.
 reduce duplicate code
@@ -204,6 +206,7 @@ protected:- the property can be accessed inside the class where it was created A
      constructor(page: Page){
       this.page = page;
       this.userName = 'testuser@gmail.com';
+      this.secretkey ='abc123'
      }
   }
 
@@ -222,3 +225,82 @@ AdminEventsPage and UserEventsPage only call super(page) inside their constructo
 
 "In a scalable Page Object Model architecture, the browser page instance and any globally shared elements  inside a Base Page Object should almost always be marked as protected, not private. Because Child Page Objects are created specifically to build upon the base layer. If we lock these core properties down as private, we defeat the purpose of inheritance. Every time a child page needs to perform an action unique to its page (such as taking a screenshot, waiting for a custom network event, or interacting with a shared header element), it will be blocked by TypeScript.
 By using protected, we maintain clean encapsulation—keeping the outside test files from messing with our internal elements—while ensuring our child pages have the necessary access to extend and scale the automation framework seamlessly."
+
+
+Assignment-5-Abstraction-and-Interfaces
+
+Q5. What is Abstraction and how can it be applied to a Playwright utility?
+
+Ans. Abstraction is the OOP principle of exposing only essential behavior while hiding implementation details. It uses methods/interfaces/utilities.
+
+example of abstraction
+import { Page } from '@playwright/test';
+
+export class LoginPage {
+
+  protected page: Page;   //Child classes CAN use this
+  protected userName : string;  
+  protected password: string
+  constructor(page: Page) {
+    this.page = page;
+  }
+
+  async login(email: string, password: string): Promise<void> {
+    await this.page.goto('/login');
+    await this.page.getByPlaceholder('you@email.com').fill(email);
+    await this.page.getByLabel('Password').fill(password);
+    await this.page.getByRole('button', { name: 'Sign In' }).click();
+  }
+}
+
+Now the test becomes:
+const loginPage = new LoginPage(page);
+
+await loginPage.login(
+  process.env.LOGIN_EMAIL!,
+  process.env.LOGIN_PASSWORD!
+);
+
+Another Example :- Created utility 
+export function parseCurrency(value: string): number {
+  return parseFloat(
+    value.replace('$', '').replace(',', '').trim()
+  );
+}
+
+Usage: const price = parseCurrency(priceText);
+
+interface Notification{
+  verifyMessage(text:string): Promise<void>
+  verifyHiddden(): Promise<void>
+
+  
+}
+
+class  ToastNotification implements Notification{
+  consturctor(private page: page){}
+
+   async verifyMessage(text:string): Promise<void>{
+    await expect(this.page.locator('.toast-message'))..toHaveText(text);
+   }
+
+   async  verifyHiddden(): Promise<void> {
+    await expect(this.page.locator('.toast-message'))
+      .toBeHidden()
+
+   }
+}
+
+class  BannerNotification implements Notification{
+  consturctor(private page: page){}
+
+   async verifyMessage(text:string): Promise<void>{
+    await expect(this.page.locator('.inline-banner'))..toHaveText(text);
+   }
+
+   async  verifyHiddden(): Promise<void> {
+    await expect(this.page.locator('.inline-banner'))
+      .toBeHidden()
+
+   }
+}

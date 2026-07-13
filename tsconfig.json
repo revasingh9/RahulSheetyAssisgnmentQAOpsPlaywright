@@ -7,10 +7,14 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
+    "allowJs": true,
+    "checkJs": false,
     "module": "NodeNext",
-    "target": "esnext",
+    "target": "ES2022",
     "moduleResolution": "NodeNext",
-    "types": [],
+    "allowImportingTsExtensions": true,
+     "noEmit": true,
+    "types": ["node", "@playwright/test"],
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
@@ -41,5 +45,10 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-  }
+  },
+ "include": [
+    "**/*.ts",
+    "**/*.js"
+  ],
+
 }

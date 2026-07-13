@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from '@playwright/test';
+import { expect,  Locator, Page } from '@playwright/test';
 
 
 export class EventsPage {
