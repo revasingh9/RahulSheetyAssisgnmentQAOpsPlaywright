@@ -4,7 +4,8 @@ const { installMockEventRoutes, buildMockEvents, findEventCardByTitle,} = requir
 const {  createBookingFromFilters} = require("../LoginHelperFolder/createBookingFromFilters.helper");
 const { parseCurrency } = require("../LoginHelperFolder/parseCurrency.helper");
 const { parseSeatCount } = require("../LoginHelperFolder/parseSeatCount.helper");
-
+//Test 1 — Mocked events catalog displays controlled data
+//Step 1 — Sign in and open Events with mock data active
 test("mock events page", async ({ page }) => {
   await installMockEventRoutes(page, buildMockEvents);
   console.log("Mock routes installed");

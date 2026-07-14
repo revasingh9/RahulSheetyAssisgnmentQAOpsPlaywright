@@ -23,8 +23,17 @@ async function createBookingFromFilters(page, { searchText, category, city }) {
   await categoryDropDownOptionMenu1.selectOption({ label: city });
   const cards = page.locator('[data-testid="event-card"]');
   await expect(cards.first()).toBeVisible();
+ const eventTitleReadFromCard =  await cards
+    .filter({ hasText: "World Tech Summit" })
+    .getByRole("heading")
+    .innerText();
+  console.log("Event Title:", eventTitleReadFromCard);
 
-  return cards.first();
+  return {
+    cards,
+    eventTitleReadFromCard,
+  };
+
 }
 
 async function bookingAssertion(

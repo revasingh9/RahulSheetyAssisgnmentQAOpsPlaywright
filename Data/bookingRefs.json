@@ -1,20 +1,20 @@
 {
   "booking1": {
-    "bookingRefValue": "W-CM8Y5J",
+    "bookingRefValue": "W-MR55XM",
     "eventTitle": "World Tech Summit",
     "ticketCount": "1",
     "totalPrice": "$1,500",
-    "customerName": "Elna Emard",
-    "customerEmail": "Luther4@hotmail.com",
-    "phone": "(802) 616-8540"
+    "customerName": "Carissa Schneider",
+    "customerEmail": "Harrison7@yahoo.com",
+    "phone": "(364) 901-8383"
   },
   "booking2": {
-    "bookingRefValue": "D-YM0XVI",
+    "bookingRefValue": "D-JOZDK9",
     "eventTitle": "Dilli Diwali Mela",
     "ticketCount": "2",
     "totalPrice": "$600",
-    "customerName": "Elna Emard",
-    "customerEmail": "Luther4@hotmail.com",
-    "phone": "(802) 616-8540"
+    "customerName": "Carissa Schneider",
+    "customerEmail": "Harrison7@yahoo.com",
+    "phone": "(364) 901-8383"
   }
 }

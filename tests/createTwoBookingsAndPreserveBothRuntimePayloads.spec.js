@@ -23,21 +23,22 @@ const Booking_Refs_InputFile_Data = path.resolve(
   "bookingRefsData.json",
 );
 test.describe.configure({ mode: "serial" });
-
-test("Create Booking From Filters", async ({ page }) => {
+// Assignment #4 Multi Bookng History and Detail Reconciliation
+test("Test 1 — Create two bookings and preserve both runtime payloads", async ({ page }) => {
 
   await login(page);
   await page.getByRole("link", { name: "Browse Events →" }).click();
   
 
-  const cards = await createBookingFromFilters(page, {
+  const { cards, eventTitleReadFromCard } = await createBookingFromFilters(page, {
     searchText: "World",
     category: "Conference",
     city: "Hyderabad",
   });
   await expect(
-    cards.getByRole("link", { name: "World Tech Summit" }),
-  ).toHaveText("World Tech Summit");
+    cards.getByRole("heading")).toHaveText(eventTitleReadFromCard);
+
+    expect(eventTitleReadFromCard).toContain("World Tech Summit");
 
   const eventTitle1 = await cards
     .filter({ hasText: "World Tech Summit" })
@@ -85,7 +86,7 @@ test("Create Booking From Filters", async ({ page }) => {
   console.log("Booking 1 — Title:", eventTitileOnBookingPage);
   console.log("Booking 1 — Tickets:", eventTicketsCountOnBookingPage);
   console.log("Booking 1 — Total Price:", eventTicketsPriceOnBookingPage);
-
+//Step 2 — Return to the event catalog and book a second event
   const clickReturnToEvents = await page
     .getByRole("main")
     .getByRole("link", { name: "Events", exact: true })
