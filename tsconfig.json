@@ -9,9 +9,10 @@
     // See also https://aka.ms/tsconfig/module
     "allowJs": true,
     "checkJs": false,
-    "module": "NodeNext",
+    "module":"commonjs",
     "target": "ES2022",
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
     "allowImportingTsExtensions": true,
      "noEmit": true,
     "types": ["node", "@playwright/test"],
@@ -40,7 +41,7 @@
     // Recommended Options
     "strict": true,
     "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
+    //"verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",

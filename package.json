@@ -3,8 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-
-
   "scripts": {},
   "keywords": [],
   "author": "",
@@ -12,7 +10,8 @@
   "devDependencies": {
     "@faker-js/faker": "^10.4.0",
     "@playwright/test": "^1.60.0",
-    "@types/node": "^25.8.0"
+    "@types/node": "^25.9.5",
+    "typescript": "^7.0.2"
   },
   "dependencies": {
     "dotenv": "^17.4.2"

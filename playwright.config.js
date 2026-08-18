@@ -28,8 +28,8 @@ module.exports = defineConfig({
   testDir: './tests',
   /* Run tests in files in parallel */
   testMatch: [
-    '**/*.spec.js',
-    '**/*.spec.ts'
+    '**/*.spec.{js,ts}',
+    '**/*.test.{js,ts}'
   ],
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -65,15 +65,22 @@ module.exports = defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+
+    //{name:'setup', testMatch:/auth\.setup\.(ts|js)$/},
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
+      use: { ...devices['Desktop Chrome'],
+        viewport: null,
+        deviceScaleFactor: undefined
 
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
+    }
+  }
+
+    // {
+    //   name: 'firefox',
+    //   use: { ...devices['Desktop Firefox'],storageState:'playwright/.auth/user.json' },
+    //   dependencies:['setup'] 
+    // },
 
     // {
     //   name: 'webkit',
